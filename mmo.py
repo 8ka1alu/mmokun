@@ -28,9 +28,9 @@ async def on_ready():
 
 
 @bot.event
-async def on_server_remove(server):
-    for channel in server.channels:
-        conn.execute("DELETE FROM in_battle WHERE channel_id=?", (channel.id,))
+async def on_guild_remove(guild):
+    for channel in guild.channels:
+        conn.execute("DELETE FROM in_battle WHERE channel_id=?", (channel.id,))#in_battleのchannel_id欄からチャンネルID削除 削除
         conn.execute("DELETE FROM channel_status WHERE channel_id=?", (channel.id,))
     conn.commit()
 
@@ -42,7 +42,8 @@ special_monster = {}
 @bot.command(pass_context=True, description='チャンネル内の敵に攻撃します。敵の反撃を受けます。')
 async def attack(ctx):
     """攻撃する"""
-    if ctx.message.author.bot: return
+    if ctx.message.author.bot:
+        return
     channel_id = ctx.message.channel.id
     if channel_id in channel_in_transaction:
         return await bot.say("`攻撃失敗。ゆっくりコマンドを打ってね。`")
@@ -56,10 +57,12 @@ async def attack(ctx):
 
 async def _attack(user_id, channel_id):
     player_hp, error_message = into_battle(user_id, channel_id)
-    if error_message: return await bot.say(error_message)
+    if error_message:
+        return await bot.send(error_message)
     player_level = get_player_level(user_id)
     boss_level, boss_hp = get_boss_level_and_hp(channel_id)
-    if player_level / boss_level > 100: return await bot.say("レベルが高すぎて攻撃できない！")
+    if player_level / boss_level > 100:
+        return await bot.say("レベルが高すぎて攻撃できない！")
     rand = random.random()
     player_attack = get_player_attack(player_level, boss_level, rand)
     boss_hp = boss_hp - player_attack
