@@ -1,7 +1,8 @@
 import random
-import sqlite3
 import math
+import gspread
 import json
+import os
 from xml.etree import ElementTree
 
 import discord
